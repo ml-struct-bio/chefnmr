@@ -1,0 +1,7 @@
+outputs/
+__pycache__/
+.wandb_osh_command_dir/
+*.out
+checkpoints/
+datasets/
+meta/

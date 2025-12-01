@@ -1,0 +1,21 @@
+# @package _global_
+dataset_args:
+  test_args:
+    test_samples: 100000 # Adjust accordingly for each experiment
+    test_batch_size: 512 # Adjust accordingly for each experiment
+    test_seed: 42
+    test_index: null
+
+test_args:
+  num_sampling_steps: 50
+  visualize_samples: 100
+  visualize_chains: 10
+
+general:
+  ckpt_abs_path: null
+  mode: test
+  wandb: disabled
+
+trainer:
+  accelerator: gpu
+  devices: 1

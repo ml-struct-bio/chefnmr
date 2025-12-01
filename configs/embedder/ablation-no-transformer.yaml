@@ -1,0 +1,25 @@
+# @package _global_
+score_model_args:
+  DiffusionModuleTransformer:
+    embedder_args:
+      hidden_dim: 256
+      dropout: 0.1
+      pooling: "attn" # "flatten", "meanmlp", "attn", "conv"
+      tokenizer_args:
+        h_pool_sizes: [8, 12]
+        h_kernel_sizes: [5, 9]
+        h_out_channels: [64, 128]
+        c_pool_sizes: [8, 12]
+        c_kernel_sizes: [5, 9]
+        c_out_channels: [64, 128]
+        h_patch_size: 192
+        h_patch_stride: 96
+        c_patch_size: 192 
+        c_patch_stride: 96
+      transformer_args:
+        pos_enc: "learnable" # "sincos" | "learnable" | null
+        type_enc: True
+        depth: 0 # if 0, does not use transformer
+        heads: 8
+        dim_head: null # if None, dim_head = hidden_dim // heads
+        mlp_ratio: 4

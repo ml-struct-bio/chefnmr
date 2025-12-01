@@ -1,0 +1,8 @@
+# @package _global_
+dataset_args:
+  num_workers: 4
+
+trainer:
+  accelerator: gpu
+  devices: 4
+  num_nodes: 2

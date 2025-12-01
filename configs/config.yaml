@@ -1,0 +1,163 @@
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/${now:%Y-%m-%d}/${now:%m-%d-%H-%M-%S}-${general.experiment_name}
+
+dataset_args:
+  name: spectranp
+  datadir: "path/to/dataset" # TODO: replace with abs path to the dataset
+  atom_decoder: ['C', 'H', 'O', 'N', 'S', 'P', 'F', 'Cl', 'Br', 'I']
+  remove_h: False
+  remove_stereo: True # Remove stereochemistry information from the SMILES
+  input_generator: "H1C13NMRSpectrum"
+  input_generator_addn_args: {"h1nmr": {"data_dim": 10000, "input_dim": 10000, "transform": "identity"}, "c13nmr": {"data_dim": 10000, "input_dim": 10000, "transform": "identity"}}
+  known_atoms: True # Know the atom types (chemical formula)
+  timeout_seconds: 2 # seconds, for rdDetermineBonds.DetermineBonds timeout when reconstructing SMILES from 3D coords for complex molecules
+  split_indices_suffix: ""
+  max_n_atoms: 274 # Adjust accordingly for different split_indices_suffix. Specify by configs/data/*.yaml or computed in DataModule
+  sigma_data: null # Standard deviation of atom coords. Adjust accordingly for different split_indices_suffix. Specify by configs/data/*.yaml or computed in DataModule
+  multitask_args:
+    p_drop_h1nmr: 0.1 # Dropout probability for H1 NMR spectra
+    p_drop_c13nmr: 0.1 # Dropout probability for C13
+    p_drop_both: 0.1 # Dropout probability for both H1 and C13 NMR spectra
+    drop_transform: "zero"
+  augmentation_args:
+    max_n_h1spectra: 1
+    max_n_c13spectra: 1
+    max_n_conformers: 3
+  batch_size: 128
+  num_workers: 4 # Number of DataLoader workers
+  pin_memory: True # Pin memory in DataLoader
+  find_unused_parameters: False # For DDP training
+  train_args:
+    use_subset: False # Use the whole dataset for training
+    train_samples: 100000
+    train_seed: 42 # Seed for reproducibility
+  test_args:
+    test_samples: 100000 # Number of test samples
+    test_batch_size: 128
+    test_seed: 42 # Always shuffle test set
+    test_index: null # If not null, test on a specific molecule index
+    test_p_drop_h1nmr: 0.0 # Disable dropout for testing
+    test_p_drop_c13nmr: 0.0 # Disable dropout for testing
+  shuffle: True # Shuffle the training data (do not shuffle validation/test data)
+
+general:
+  experiment_name: nmr-to-3d # Specify the name by "$SLURM_JOB_NAME" or manually
+  seed: null # Random seed for reproducibility, if null, do not set the seed
+  wandb: 'offline-sync' # online | offline | disabled | offline-sync; offline-sync used for SLURM jobs (sync via wandb-osh)
+  mode: 'train' # train | test
+  # when mode is 'train' and ckpt_abs_path is not null, resume training from the checkpoint
+  # when mode is 'test' and ckpt_abs_path is not null, test the model from the checkpoint
+  ckpt_abs_path: null # Absolute path to the checkpoint file
+  save_checkpoint: True # Whether to save checkpoints during training
+  save_top_n_ckpts: 3 # Save top n checkpoints
+
+neural_network_args:
+  use_ema: True # Whether to use EMA for the model parameters
+  ema_decay: 0.999
+
+score_model_args:
+  model_name: DiffusionModuleTransformer
+  DiffusionModuleTransformer:
+    in_atom_feature_size: null # Placeholder, compute in the LightningModule
+    out_atom_feature_size: 3 # 3 for coordinates
+    condition: null # Placeholder, compute in the LightningModule
+    in_condition_size: null # Placeholder, compute in the LightningModule
+    drop_transform: null # Placeholder, compute in the LightningModule
+    max_n_atoms: null # Placeholder, compute in the LightningModule
+    n_blocks: 12 # Number of DiT blocks
+    n_heads: 8
+    hidden_size: 768
+    mlp_ratio: 4.0
+    embedder_args: # NMR spectrum embedder
+      hidden_dim: 256
+      dropout: 0.1
+      pooling: "attn" # "flatten", "attn"
+      tokenizer_args:
+        h_tokenizer: "conv" # "patch" | "conv" | "embed"
+        c_tokenizer: "embed" # "patch" | "conv" | "embed"
+        h_pool_sizes: [8, 12]
+        h_kernel_sizes: [5, 9]
+        h_out_channels: [64, 128]
+        c_pool_sizes: [8, 12]
+        c_kernel_sizes: [5, 9]
+        c_out_channels: [64, 128]
+        h_patch_size: 256
+        h_patch_stride: 128
+        c_patch_size: 256 
+        c_patch_stride: 128
+        h_mask_token: True # Use mask token for missing H1 NMR spectra
+        c_mask_token: True # Use mask token for missing C13 NMR spectra
+      transformer_args:
+        pos_enc: "learnable" # "sincos" | "learnable" | null
+        type_enc: True
+        depth: 4 # if 0, does not use transformer
+        heads: 8
+        dim_head: null # if None, dim_head = hidden_dim // heads
+        mlp_ratio: 4
+
+trainer:
+  accelerator: gpu
+  devices: 4
+  num_nodes: 1
+  max_epochs: -1 # Will always train until the job is killed
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 50
+  reload_dataloaders_every_n_epochs: 0
+  precision: "bf16-mixed" # Use mixed precision. See https://lightning.ai/docs/pytorch/stable/common/trainer.html#precision
+  gradient_clip_val: null # See https://lightning.ai/docs/pytorch/stable/common/trainer.html#gradient-clip-val
+  accumulate_grad_batches: 1 # See https://lightning.ai/docs/pytorch/stable/common/trainer.html#accumulate-grad-batches
+  num_sanity_val_steps: 2 # Sanity val check. See https://lightning.ai/docs/pytorch/stable/common/trainer.html#num-sanity-val-steps
+
+training_args:
+  diffusion_multiplicity: 1 # Number of duplicate samples per molecule in each training batch
+  optimizer: adam
+  adam:
+    adam_beta_1: 0.9
+    adam_beta_2: 0.95
+    adam_eps: 1e-8
+  base_lr: 1e-4
+
+validation_args:
+  diffusion_multiplicity: 1 # Number of duplicate samples per molecule in each validation batch
+  sample_every_n_val_epoch: 50
+  diffusion_samples: 1 # Number of predicted samples per molecule when inference during validation (if any)
+  num_sampling_steps: 50
+  visualize_samples: 10
+  visualize_chains: 2
+  
+test_args:
+  num_sampling_steps: 50
+  diffusion_samples: 1 # Number of predicted samples per molecule when inference during testing
+  visualize_samples: 10
+  visualize_chains: 2
+
+visualization_args:
+  n_chain_frames: 50
+
+diffusion_process_args:
+  train_sigma_distribution_type: af3 # Distribution to sample noise level (sigma) during training
+  train_sigma_args:
+    edm_P_mean: -1.2
+    edm_P_std: 1.3
+  sample_sigma_schedule_type: edm # Sigma schedule type during sampling/inference
+  sample_gamma_schedule_type: edm # Gamma schedule type during stochastic sampling/inference
+  sigma_min: 0.001 # Minimum noise level during sampling
+  sigma_max: 80.0 # Maximum noise level during sampling
+  gamma_min: 1.0 # Minimum gamma during stochastic sampling
+  noise_scale: 1.0
+  step_scale: 1.0
+  guidance_scale: 0.0 # Guidance scale for classifier-free guidance
+  synchronize_sigmas: False
+  coordinate_transformation_when_training: "centering_rotation_translation" # Coordinate transformation when training
+  edm_args:
+    sigma_data: null # Placeholder. fill in from dataset_args.sigma_data
+    rho: 7
+    use_heun_solver: True
+    gamma_0: 0.8
+
+diffusion_loss_args:
+  add_smooth_lddt_loss: True
+  lddt_loss_threshold: [0.5, 1.0, 2.0, 4.0]

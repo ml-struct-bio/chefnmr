@@ -1,0 +1,4 @@
+# @package _global_
+dataset_args:
+  augmentation_args:
+    max_n_conformers: 1

@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --job-name=NPunseen-H10kC10k-L64-cfg15-seed42
+#SBATCH --output=./script/01-sampling/32-spectranp-unseen-scaffold/%x_%j.out
+#SBATCH --partition=cryoem      # set partition
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks-per-node=1               # total number of tasks across all nodes
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=4        # cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --time=4:00:00          # total run time limit (HH:MM:SS)
+#SBATCH --mem-per-cpu=48G
+export CHEFNMR_DIR='/scratch/gpfs/ZHONGE/zx8205/dev/chefnmr'
+export CKPT_PATH="$CHEFNMR_DIR/checkpoints/NP-H10kC10k-L64-epoch18149.ckpt"
+
+module load anaconda3/2024.6 # Change to your Anaconda module or delete if not needed
+conda activate nmr3d
+cd "$CHEFNMR_DIR"
+
+python -m src.main \
+    +condition=h1c13nmr-10k-10k \
+    +data=spectranp-unseen-scaffold \
+    +embedder=hybrid-baseline \
+    +lddt=threshold5124 \
+    +model=dit-l \
+    +training_transform=center_rot_trans \
+    +diffusion=edm-train_af3-sample_edm_sde \
+    dataset_args.batch_size=64 \
+    general.experiment_name="${SLURM_JOB_NAME}_${SLURM_JOB_ID}" \
+    +aug_conf=conf3 \
+    +guidance=cfg15 \
+    general.ckpt_abs_path="$CKPT_PATH" \
+    +exp=eval_ckpt \
+    test_args.diffusion_samples=10 \
+    dataset_args.test_args.test_samples=100000 \
+    dataset_args.test_args.test_batch_size=120 \
+    test_args.num_sampling_steps=50 \
+    general.seed=42

@@ -1,0 +1,12 @@
+# @package _global_
+dataset_args:
+  name: real-specteach
+  datadir: "/scratch/gpfs/ZHONGE/zx8205/dev/chefnmr/datasets/real-specteach"
+  atom_decoder: ['C', 'H', 'O', 'N', 'S', 'P', 'F', 'Cl', 'Br', 'I']
+  remove_h: False
+  remove_stereo: True
+  known_atoms: True
+  timeout_seconds: 0 # seconds, for rdDetermineBonds.DetermineBonds
+  split_indices_suffix: ""
+  sigma_data: 2.67
+  max_n_atoms: 101

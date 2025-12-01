@@ -1,0 +1,3 @@
+# @package _global_
+diffusion_process_args:
+  coordinate_transformation_when_training: "centering_rotation_translation"

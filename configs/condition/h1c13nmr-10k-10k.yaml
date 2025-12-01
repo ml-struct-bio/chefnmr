@@ -1,0 +1,11 @@
+# @package _global_
+dataset_args:
+  input_generator: "H1C13NMRSpectrum"
+  input_generator_addn_args: {"h1nmr": {"data_dim": 10000, "input_dim": 10000, "transform": "identity"}, "c13nmr": {"data_dim": 10000, "input_dim": 10000, "transform": "identity"}}
+
+score_model_args:
+  DiffusionModuleTransformer:
+    embedder_args:
+      tokenizer_args:
+        h_tokenizer: "conv" # "patch" | "conv" | "embed"
+        c_tokenizer: "conv" # "patch" | "conv" | "embed"

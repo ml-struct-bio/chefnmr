@@ -1,0 +1,3 @@
+# @package _global_
+diffusion_loss_args:
+  add_smooth_lddt_loss: False

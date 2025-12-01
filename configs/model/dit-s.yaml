@@ -1,0 +1,8 @@
+# @package _global_
+score_model_args:
+  model_name: DiffusionModuleTransformer
+  DiffusionModuleTransformer:
+    n_blocks: 12
+    n_heads: 8
+    hidden_size: 768
+    mlp_ratio: 4.0
