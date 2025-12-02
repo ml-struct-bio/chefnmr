@@ -1,6 +1,6 @@
 # ChefNMR🧑‍🍳⚛️: Atomic Diffusion Models for Small Molecule Structure Elucidation from NMR Spectra
 
-## [Paper](https://openreview.net/pdf?id=STsjfx2cee) | [Dataset & Checkpoints (Zenodo)](LINK_TO_ZENODO) ![NeurIPS 2025](https://img.shields.io/badge/NeurIPS-2025-blue.svg)
+## [Paper](https://openreview.net/pdf?id=STsjfx2cee) | [Dataset & Checkpoints](https://zenodo.org/records/17766755) ![NeurIPS 2025](https://img.shields.io/badge/NeurIPS-2025-blue.svg)
 
 This repository provides the official implementation of the paper ChefNMR (**CH**emical **E**lucidation **F**rom **NMR**): "Atomic Diffusion Models for Small Molecule Structure Elucidation from NMR Spectra".
 
@@ -23,7 +23,7 @@ conda activate nmr3d
 
 ## Download Data & Checkpoints
 
-Please download the datasets and pretrained model checkpoints from [Zenodo](LINK_TO_ZENODO).
+Please download the datasets and pretrained model checkpoints from [Zenodo](https://zenodo.org/records/17766755).
 
 ### Directory Structure
 
