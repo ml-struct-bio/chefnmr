@@ -1,6 +1,6 @@
 # ChefNMR🧑‍🍳⚛️: Atomic Diffusion Models for Small Molecule Structure Elucidation from NMR Spectra
 
-## [Paper](https://openreview.net/pdf?id=STsjfx2cee) | [Dataset & Checkpoints](https://zenodo.org/records/17766755) ![NeurIPS 2025](https://img.shields.io/badge/NeurIPS-2025-blue.svg)
+## [Paper](https://arxiv.org/abs/2512.03127) | [Dataset & Checkpoints](https://zenodo.org/records/17766755) ![NeurIPS 2025](https://img.shields.io/badge/NeurIPS-2025-blue.svg)
 
 This repository provides the official implementation of the paper ChefNMR (**CH**emical **E**lucidation **F**rom **NMR**): "Atomic Diffusion Models for Small Molecule Structure Elucidation from NMR Spectra".
 
@@ -239,7 +239,7 @@ If you find this code useful, please cite:
   title={Atomic Diffusion Models for Small Molecule Structure Elucidation from NMR Spectra},
   author={Xiong, Ziyu and Zhang, Yichi and Alauddin, Foyez and Cheng, Chu Xin and An, Joon Soo and Seyedsayamdost, Mohammad R and Zhong, Ellen D},
   booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
-  url={https://openreview.net/pdf?id=STsjfx2cee},
+  url={https://arxiv.org/abs/2512.03127},
   year={2025}
 }
 ```
